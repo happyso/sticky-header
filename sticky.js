@@ -17,7 +17,7 @@
     let last_known_scroll_position = 0;
     let ticking = false;
 
-    var defaults = {
+    let defaults = {
         selectorWrap: '[data-sticky-wrap]',
 		selectorHeader: '[data-sticky-header]'
 	};
@@ -57,7 +57,7 @@
 
     };
 
-    var eventThrottler = function () {
+    let eventThrottler = function () {
         last_known_scroll_position = window.scrollY;
         if (!ticking) {
             window.requestAnimationFrame(function() {
@@ -72,14 +72,30 @@
     //엘리먼트의 스크롤시 움직임 시작할 위치를 구해야하고
     //움직임이 멈추는 부모 엘리먼트위치 체크도 필요하다.
 
+    //유저의 값과 기존 값을 합치고 변경해야함 
 
 
-    stickyHeader.init = function () {
-        wrap = document.querySelector(defaults.selectorWrap);
-        header = document.querySelector(defaults.selectorHeader);
+
+    //deep merge 
+    //출저 : https://gist.github.com/ahtcx/0cd94e62691f539160b32ecda18af3d6
+    const merge = (defaults, source) => {
+        // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
+        for (const key of Object.keys(source)) {
+          if (source[key] instanceof Object) Object.assign(source[key], merge(defaults[key], source[key]));
+        }
+      
+        // Join `target` and modified `source`
+        Object.assign(defaults || {}, source);
+        return defaults
+    };
+
+
+    stickyHeader.init = function (option) {
+        settings = merge(defaults, option || {});
+        console.log(settings);
+        wrap = document.querySelector(settings.selectorWrap);
+        header = document.querySelector(settings.selectorHeader);
         getStickyPosition(wrap, header);
-
-        console.log(posY, endPoint);
 
         window.addEventListener( 'scroll', eventThrottler, false); 
     };
